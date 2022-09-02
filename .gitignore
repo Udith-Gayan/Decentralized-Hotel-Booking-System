@@ -1,0 +1,6 @@
+node_modules
+dist/build
+dist/lib/
+dist/index.js
+
+api-commands.txt
