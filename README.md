@@ -1,1 +1,1 @@
-# hotel-booking-smart-contract
+# Hotel Booking Smart Contract
