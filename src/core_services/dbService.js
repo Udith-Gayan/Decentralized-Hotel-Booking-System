@@ -16,17 +16,19 @@ export class DbService {
             this.#db = new sqlite3.Database(settings.dbPath);
             await this.#runQuery(`CREATE TABLE IF NOT EXISTS Hotels (
                     Id INTEGER,
+                    HotelWalletAddress TEXT NOT NULL UNIQUE,
                     HotelNftId TEXT NOT NULL UNIQUE,
                     Name TEXT,
                     Address TEXT,
                     Email TEXT,
-                    IsRegistered INTEGER DEFAULT 1 NOT NULL,
+                    IsRegistered INTEGER DEFAULT 0,
                     PRIMARY KEY("Id" AUTOINCREMENT)
                     )`);
 
             await this.#runQuery(`CREATE TABLE IF NOT EXISTS Rooms (
                         Id INTEGER,
                         HotelId INTEGER,
+                        RoomNftId TEXT NOT NULL UNIQUE,
                         Name TEXT NOT NULL,
                         PRIMARY KEY("Id" AUTOINCREMENT),
                         FOREIGN KEY (HotelId) REFERENCES Hotels (Id)
@@ -51,35 +53,35 @@ export class DbService {
     static async #insertData() {
 
         // Inserting hotels
-        let hotels = `INSERT INTO Hotels(Id, HotelNftId, Name, Address, Email, IsRegistered) VALUES 
-                        (1, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D65", "Hotel1", "Loca1", "test1@gmail.com", 1),
-                        (2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D66", "Hotel2", "Loca2", "test2@gmail.com", 1),
-                        (3, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D67", "Hotel3", "Loca3", "test3@gmail.com", 1)`;
+        let hotels = `INSERT INTO Hotels(Id, HotelWalletAddress, HotelNftId, Name, Address, Email, IsRegistered) VALUES 
+                        (1, "rpnzMDvKfN1ewJs4ddSRXFFZQF6Ubmhkqx", "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D65", "Hotel1", "Loca1", "test1@gmail.com", 1),
+                        (2, "rfKk9cRbspDzo62rbWniTMQX93FfCt8w5o", "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D66", "Hotel2", "Loca2", "test2@gmail.com", 1),
+                        (3, "rLkLngcLBKfiYRL32Ygk4WYofBudgii3zk", "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D67", "Hotel3", "Loca3", "test3@gmail.com", 1)`;
 
         await this.#runQuery(hotels);
 
         // Inserting Rooms
-        let rooms = `INSERT INTO Rooms(Id, HotelId, Name) VALUES
-                        (1, 1, "Room1"),
-                        (2, 1, "Room2"),
-                        (3, 1, "Room3"),
-                        (4, 2, "Room1"),
-                        (5, 2, "Room2"),
-                        (6, 2, "Room3"),
-                        (7, 2, "Room4"),
-                        (14, 1, "Room4"),
-                        (8, 1, "Room5"),
-                        (9, 1, "Room6"),
-                        (10, 1, "Room7"),
-                        (11, 3, "Room1"),
-                        (12, 3, "Room2"),
-                        (13, 2, "Room5")`;
+        let rooms = `INSERT INTO Rooms(Id, HotelId, RoomNftId, Name) VALUES
+                        (1, 1, "000B013A95F14B0044F78A264E41713C64B5F8924254055E208C3098E00000D65", "Room1"),
+                        (2, 1, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D33", "Room2"),
+                        (3, 1, "000B013A95F14B0044F78A264E41713C64B5F89242540EEDD08C3098E00000D65", "Room3"),
+                        (4, 2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE20866098E00000D65", "Room1"),
+                        (5, 2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208CFEWF98E00000D65", "Room2"),
+                        (6, 2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208VDFV98E00000D65", "Room3"),
+                        (7, 2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208CVD098E00000D65", "Room4"),
+                        (14, 1, "000B013A95F14B0044F78A264E41713C64B5F89242540VDFDFDFF098E00000D65", "Room4"),
+                        (8, 1, "000B013A95F14B0044F78A264E41713C64B5F892425SDDSFDFDC3098E00000D65", "Room5"),
+                        (9, 1, "000B013A95F14B0044F78A264E41713C64B5F89242SDCVDSSDVC3098E00000D65", "Room6"),
+                        (10, 1, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208C3098E00000D65", "Room7"),
+                        (11, 3, "000B013A95F14B0044F78A264E41713C64B5F89242540EEFVDV3098E00000D65", "Room1"),
+                        (12, 3, "000B013A95F14B0044F78A264E41713C64B5F892425VDFVFVDF3098E00000D65", "Room2"),
+                        (13, 2, "000B013A95F14B0044F78A264E41713C64B5F89242540EE208D3098E00000D65", "Room5")`;
         await this.#runQuery(rooms);
 
         // Inserting Bookings
-        let bookings = `INSERT INTO Bookings(Id, RoomId, PersonName, FromDate, ToDate) VALUES
-                            (1, 1, "User1", "000B013A95F14B0044F78A264E41713C64B5F89242540EE208", "2022-8-31", "2022-9-2"),
-                            (2, 1, "User2", "000B013A95F14B0044F78A264E41713C64B5F89242540EE210", "2022-9-3", "2022-9-5"),
+        let bookings = `INSERT INTO Bookings(Id, RoomId, PersonName, UserPubkey, FromDate, ToDate) VALUES
+                            (1, 1, "User1", "000B013A95F14B0044F78A264E41713C64B5F89242540EE208", "2022-8-10", "2022-8-15"),
+                            (2, 1, "User2", "000B013A95F14B0044F78A264E41713C64B5F89242540EE210", "2022-9-3", "2022-9-10"),
                             (3, 5, "User3", "000B013A95F14B0044F78A264E41713C64B5F89242540EE209",  "2022-8-31", "2022-9-2")`;
         await this.#runQuery(bookings);
     }

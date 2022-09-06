@@ -89,7 +89,7 @@ class SqliteDatabase {
         filterStr = filterStr.slice(0, -5);
 
         const query = `SELECT * FROM ${tableName}` + (filterStr ? ` WHERE ${filterStr};` : ';');
-        console.log("Query: "+ query);
+        console.log("Query: " + query);
         return new Promise((resolve, reject) => {
             let rows = [];
             this.db.each(query, values, function (err, row) {
@@ -158,7 +158,7 @@ class SqliteDatabase {
                 rowValueStr += '(';
                 for (const columnName of columnNames) {
                     rowValueStr += ('?,');
-                    rowValues.push(val[columnName] ? val[columnName] : 'NULL');
+                    rowValues.push(val[columnName] ?? 'NULL');
                 }
                 rowValueStr = rowValueStr.slice(0, -1) + '),';
             }

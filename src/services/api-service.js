@@ -1,12 +1,13 @@
-
 const xrpl = require("xrpl")
 const { SqliteDatabase, DataTypes } = require("../core_services/sqlite-handler")
-const { DbService } = require("../core_services/dbService");
+// const { DbService } = require("../core_services/dbService");
+const { TransactionService } = require('./transaction-service');
 const settings = require('../settings.json').settings;
 
 export class ApiService {
 
-    dbPath = settings.dbPath
+    dbPath = settings.dbPath;
+    #transactionService = null;
 
     constructor() {
         console.log(settings.dbPath);
@@ -16,9 +17,10 @@ export class ApiService {
 
     async handleRequest(user, message, isReadOnly) {
 
+        this.db.open();
+        this.#transactionService = new TransactionService(message);
         // This sample application defines two simple messages. 'get' and 'set'.
         // It's up to the application to decide the structure and contents of messages.
-
         if (message.type == 'get') {
 
             // Define the network client
@@ -48,37 +50,38 @@ export class ApiService {
             // client.disconnect()
 
         }
-        else if (message.type == 'registerHotel') {                                     //------------------- Register Hotel ------------------------------------
-            let data = {
-                hotelNftId: message.data.HotelNftId,
-                name: message.data.Name,
-                address: message.data.Address,
-                email: message.data.Email
-            };
-
-            this.db.open();
-            if (await this.db.isTableExists('Hotels')) {
-                try {
-                    await this.db.insertValue('Hotels', data);
-
-                } catch (e) {
-                    console.log(`Error occured in hotel registration: ${e}`);
-                    await this.sendOutput(user, `Error occured in hotel registration: ${e}`)
-                }
-            } else {
-                console.log('Table "Hotel" not found.');
-                await this.sendOutput(user, 'Table "Hotel" not found.')
-            }
-            await this.sendOutput(user, 'Hotel Registered successfully.');
-
+        else if (message.type == 'hotelRegistration') {                                     //------------------- Register Hotel (hotelRegRequest, hotelRegConfirm) ------------------------------------
+            let result = await this.#transactionService.handleTransaction();
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'createRoom') {                                            //------------------- Create Room --------------------------------------
+            let result = await this.#transactionService.createRoom();
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'getRoomsByHotel') {                                        //-------------------- Get rooms of a hotel-------------------------
+            const hotelId = message.data.hotelId;
+            const result = await this.#transactionService.getRoomsByHotel(hotelId);
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'makeBooking') {                                        //--------------------Make a booking-----------------------------
+            const result = await this.#transactionService.makeReservation(user.publicKey);
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'getAllBookings') {                                     //------------------ Get all bookings----------------------------------
+            let result = this.#transactionService.getAllBookings();
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'transactions') {                                      //---------------------- Transaction Handler----------------------------
+            let result = await this.#transactionService.handleTransaction();
+            await this.sendOutput(user, result);
         }
         else if (message.type == 'getAllHotels') {                                          //------------------- Get all hotels ------------------------------------
             console.log('Received GetAllHotels Request');
             let hotelList = [];
-            this.db.open();
+            let filters = message.filters ? message.filters : null;
             if (await this.db.isTableExists('Hotels')) {
                 try {
-                    hotelList = await this.db.getValues('Hotels', { isRegistered: 1 });
+                    hotelList = await this.db.getValues('Hotels', filters);
                 } catch (e) {
                     console.log(`Error occured in retrieving all hotels: ${e}`);
                     await this.sendOutput(user, `Error occured in retrieving all hotels: ${e}`)
@@ -95,7 +98,6 @@ export class ApiService {
                 HotelId: message.data.hotelId,
                 Name: message.data.name
             }
-            this.db.open();
             if (await this.db.isTableExists('Rooms')) {
                 try {
                     await this.db.insertValue('Rooms', data);
@@ -114,7 +116,6 @@ export class ApiService {
             console.log('Received GetAllRooms Request');
             let filters = message.filters ?? null;
             let roomList = [];
-            this.db.open();
             if (await this.db.isTableExists('Rooms')) {
                 try {
                     roomList = await this.db.getValues('Rooms', filters);
@@ -132,7 +133,6 @@ export class ApiService {
             console.log('Serching  hotels by');
             let filters = message.filters ?? null;
             let hotelList = [];
-            this.db.open();
             if (await this.db.isTableExists('Hotels')) {
                 try {
                     hotelList = await this.db.getValues("Hotels", filters);
@@ -147,7 +147,7 @@ export class ApiService {
             await this.sendOutput(user, JSON.stringify(hotelList));
 
         }
-        else if (message.type == 'makeBooking') {                                             //------------------- Make Bookings ------------------------------------
+        else if (message.type == 'makeBooking2') {                                             //------------------- Make Bookings ------------------------------------
             console.log("Creating a reservation");
             let data = {
                 roomId: message.data.roomId,
@@ -156,13 +156,12 @@ export class ApiService {
                 fromDate: message.data.fromDate,
                 toDate: message.data.toDate
             }
-            this.db.open();
             if (await this.db.isTableExists('Bookings')) {
                 try {
                     await this.db.insertValue("Bookings", data);
                     await this.sendOutput(user, "Booking successful.");
                 } catch (e) {
-                        await this.sendOutput(user, `Error in making the booking`)
+                    await this.sendOutput(user, `Error in making the booking`)
                 }
             }
             else {
