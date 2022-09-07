@@ -54,6 +54,10 @@ export class ApiService {
             let result = await this.#transactionService.handleTransaction();
             await this.sendOutput(user, result);
         }
+        else if (message.tye == 'getHotels') {                                             //---------------------Get hotels(with filters)-----------------------
+            let result = await this.#transactionService.getHotels();
+            await this.sendOutput(user, result);
+        }
         else if (message.type == 'createRoom') {                                            //------------------- Create Room --------------------------------------
             let result = await this.#transactionService.createRoom();
             await this.sendOutput(user, result);
@@ -67,8 +71,12 @@ export class ApiService {
             const result = await this.#transactionService.makeReservation(user.publicKey);
             await this.sendOutput(user, result);
         }
-        else if (message.type == 'getAllBookings') {                                     //------------------ Get all bookings----------------------------------
+        else if (message.type == 'getAllBookings') {                                     //------------------ Get all bookings (with filters)----------------------------------
             let result = this.#transactionService.getAllBookings();
+            await this.sendOutput(user, result);
+        }
+        else if (message.type == 'getAllBookingsByUser') {                                     //------------------ Get all bookings of a User----------------------------------
+            let result = this.#transactionService.getAllBookings(user.publicKey);
             await this.sendOutput(user, result);
         }
         else if (message.type == 'transactions') {                                      //---------------------- Transaction Handler----------------------------

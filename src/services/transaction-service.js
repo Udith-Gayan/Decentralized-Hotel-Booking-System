@@ -194,8 +194,6 @@ class TransactionService {
         return JSON.stringify(resObj);
     }
 
-
-
     async #getAnAvailableOffer() {
         try {
             const createdOffers = await this.#contractAcc.getNftOffers();
@@ -210,7 +208,6 @@ class TransactionService {
         } catch (error) {
             throw error;
         }
-
     }
 
     async #confirmHotelRegistration() {
@@ -295,10 +292,13 @@ class TransactionService {
         }
     }
 
-    async getAllBookings() {
-        let filters = null;
+    async getAllBookings(userPubKey = null) {
+        let filters = userPubKey == null ? null : {} ;
         if (this.#message.filters)
             filters = this.#message.filters;
+        
+        if (userPubKey != null)
+            filters.userPubkey = userPubKey;
 
         try {
             this.#db.open();
@@ -316,8 +316,29 @@ class TransactionService {
         }
     }
 
+    async getHotels() {
+        let filters = null;
+        if (this.#message.filters) {
+            filters = this.#message.filters;
+        }
 
+        try {
+            this.#db.open();
+            await this.#xrpl.connect();
+
+            const hotels = await this.#db.getValues('Hotels', filters);
+            console.log(hotels);
+            return hotels;
+
+        } catch (error) {
+            return `Error in fetching hotels: ${error}`;
+        } finally {
+            this.#db.close();
+            await this.#xrpl.disconnect();
+        }
+    }
 }
+
 
 
 module.exports = {
