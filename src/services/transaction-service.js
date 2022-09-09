@@ -41,7 +41,7 @@ class TransactionService {
             }
 
         } catch (error) {
-            return error;
+            return { error: error };
         } finally {
             await this.#xrpl.disconnect();
             this.#db.close();
@@ -52,20 +52,21 @@ class TransactionService {
     async createRoom() {
         const roomName = this.#message.data.name;
         const hotelId = this.#message.data.hotelId;
-
+        let resObj = {};
         try {
             this.#db.open();
             const rowId = (await this.#db.insertValue("Rooms", { name: roomName, hotelId: hotelId })).lastId;
-            return JSON.stringify({ rowId: rowId })
+            resObj.success = { rowId: rowId };
         } catch (error) {
-            return `Error in creating the room ${error}`;
+            resObj.error = `Error in creating the room ${error}`;
         } finally {
             this.#db.close();
         }
-
+        return resObj;
     }
 
     async getRoomsByHotel(hotelId) {
+        let resObj = {};
         try {
             this.#db.open();
             this.#xrpl.connect();
@@ -81,16 +82,16 @@ class TransactionService {
             rooms = rooms.filter(rm => nftIds.includes(rm.RoomNftId));
 
             const roomResult = rooms.map(rm => { return { nftId: rm.RoomNftId, roomName: rm.Name, id: rm.Id } });
-
-            return roomResult;  // may be need to convert to string
-
+            resObj.success = { rooms: roomResult };
 
         } catch (error) {
-            return `Error in fetching rooms: ${error}`;
+            resObj.error = `Error in fetching rooms: ${error}`;
         } finally {
             this.#db.close();
             this.#xrpl.disconnect();
         }
+
+        return resObj;
     }
 
     // mint token and create token sell offers for those
@@ -158,6 +159,9 @@ class TransactionService {
     }
 
     async #requestHotelRegistration() {
+
+        let resObj = {};
+
         let data = {
             hotelWalletAddress: this.#message.data.HotelWalletAddress,
             name: this.#message.data.Name,
@@ -166,32 +170,39 @@ class TransactionService {
             email: this.#message.data.Email
         };
 
-        //Serch for a free offer
-        const availableOffer = await this.#getAnAvailableOffer();
-        console.log('Avaialble offer: ');
-        console.log(availableOffer);
-        if (availableOffer != null) {
-            data.hotelNftId = availableOffer.NFTokenID;
+        try {
+            //Serch for a free offer
+            const availableOffer = await this.#getAnAvailableOffer();
+            console.log('Avaialble offer: ');
+            console.log(availableOffer);
+            if (availableOffer != null) {
+                data.hotelNftId = availableOffer.NFTokenID;
 
-        } else {
-            throw ('No avaialble offer for registration.');
-        }
-
-        let insertedId;
-        if (await this.#db.isTableExists('Hotels')) {
-            try {
-                insertedId = (await this.#db.insertValue('Hotels', data)).lastId;
-
-            } catch (e) {
-                console.log(`Error occured in hotel registration: ${e}`);
-                throw (`Error occured in hotel registration: ${e}`)
+            } else {
+                throw ('No available offer for registration.');
             }
-        } else {
-            throw ('Table "Hotel" not found.')
-        }
 
-        const resObj = { rowId: insertedId, offerId: availableOffer.index }
-        return JSON.stringify(resObj);
+            let insertedId;
+            if (await this.#db.isTableExists('Hotels')) {
+                try {
+                    insertedId = (await this.#db.insertValue('Hotels', data)).lastId;
+
+                } catch (e) {
+                    console.log(`Error occured in hotel registration: ${e}`);
+                    throw (`Error occured in hotel registration: ${e}`)
+                }
+            } else {
+                throw ('Table "Hotel" not found.')
+            }
+
+            resObj = { rowId: insertedId, offerId: availableOffer.index }
+
+        } catch (e) {
+            resObj.error = e;
+        }
+        // return JSON.stringify(resObj);
+        return resObj;
+
     }
 
     async #getAnAvailableOffer() {
@@ -213,6 +224,7 @@ class TransactionService {
     async #confirmHotelRegistration() {
         const rowId = this.#message.data.rowId;
         const walletAddress = this.#message.data.hotelWalletAddress;
+        let resObj = {};
         try {
             const rows = await this.#db.getValues("Hotels", { id: rowId });
             if (rows.length != 0) {
@@ -222,12 +234,14 @@ class TransactionService {
                     await this.#db.updateValue("Hotels", { isRegistered: 1 }, { id: rowId });
                 }
             } else {
-                throw ("Error in confimng registration. Re-register please.");
+                throw ("Error in confirming registration. Re-register please.");
             }
-            return "Hotel Successfully Registered."
-        } catch (error) {
-            throw (error);
+            resObj.success = 'Hotel Registration Successful.'
+        } catch (e) {
+            resObj.error = e;
         }
+
+        return resObj;
     }
 
     async #hasNft(walletAddress, nftId, byUri = null) {
@@ -248,7 +262,7 @@ class TransactionService {
         const roomId = this.#message.data.roomId;
         const fromDate = this.#message.data.fromDate;
         const toDate = this.#message.data.toDate;
-
+        let resObj = {};
         try {
             this.#db.open();
             await this.#xrpl.connect();
@@ -268,7 +282,7 @@ class TransactionService {
                 }
             }
             if (isDateAlreadyBooked) {
-                return "Date Already Booked. Choose another date.";
+                throw ("Date Already Booked. Choose another date.");
             }
 
             const data = {
@@ -282,38 +296,42 @@ class TransactionService {
 
             const rowId = (await this.#db.insertValue("Bookings", data)).lastId;
             console.log("Reservation making Success!");
-            return JSON.stringify({ rowId: rowId });
+            resObj.success = { rowId: rowId };
 
         } catch (error) {
-            return `Error in Making the Reservation: ${error}`
+            resObj.error = `Error in Making the Reservation: ${error}`
         } finally {
             this.#db.close();
             await this.#xrpl.disconnect();
         }
+
+        return resObj;
     }
 
     async getAllBookings(userPubKey = null) {
-        let filters = userPubKey == null ? null : {} ;
+        let filters = userPubKey == null ? null : {};
         if (this.#message.filters)
             filters = this.#message.filters;
-        
+
         if (userPubKey != null)
             filters.userPubkey = userPubKey;
 
+        let resObj = {};
         try {
             this.#db.open();
             await this.#xrpl.connect();
 
             const bookings = await this.#db.getValues('Bookings', filters);
-            console.log(bookings);
-            return bookings;
+            resObj.success = { bookings: bookings };
 
         } catch (error) {
-            return `Error in fetching bookings: ${error}`;
+            resObj.error = `Error in fetching bookings: ${error}`;
         } finally {
             this.#db.close();
             await this.#xrpl.disconnect();
         }
+
+        return resObj;
     }
 
     async getHotels() {
@@ -322,20 +340,23 @@ class TransactionService {
             filters = this.#message.filters;
         }
 
+        let resObj = {};
         try {
             this.#db.open();
             await this.#xrpl.connect();
 
             const hotels = await this.#db.getValues('Hotels', filters);
             console.log(hotels);
-            return hotels;
+            resObj.success = { hotels: hotels };
 
         } catch (error) {
-            return `Error in fetching hotels: ${error}`;
+            resObj.error = `Error in fetching hotels: ${error}`;
         } finally {
             this.#db.close();
             await this.#xrpl.disconnect();
         }
+
+        return resObj;
     }
 }
 
