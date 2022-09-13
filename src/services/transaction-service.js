@@ -1,6 +1,7 @@
 const { XrplAccount } = require('./../core_services/xrpl-account');
 const { XrplApi } = require('./../core_services/xrpl-api');
 const { SqliteDatabase, DataTypes } = require("../core_services/sqlite-handler")
+const xrpl = require('xrpl');
 const settings = require('../settings.json').settings;
 
 class TransactionService {
@@ -30,7 +31,7 @@ class TransactionService {
                     return await this.#mintCreateRegTokenOffers(noOfTokens);
                     break;
                 case 'hotelRegRequest':
-                    // return "{"rowId":4,"offerId":"266BF70C1E820CCD8597B99B1A31E682E7E883D4C0C2385CE71A3405C180DF79"}"
+                    // return "{ "success": {"rowId":4,"offerId":"266BF70C1E820CCD8597B99B1A31E682E7E883D4C0C2385CE71A3405C180DF79"} }"
                     return await this.#requestHotelRegistration();
                     break;
                 case 'hotelRegConfirm':
@@ -51,11 +52,16 @@ class TransactionService {
     // Creates a db record when a room nft is minted
     async createRoom() {
         const roomName = this.#message.data.name;
-        const hotelId = this.#message.data.hotelId;
+        const roomNftId = this.#message.data.roomNftId;
+        const hotelWalletAddress = this.#message.data.hotelWalletAddress;
         let resObj = {};
         try {
             this.#db.open();
-            const rowId = (await this.#db.insertValue("Rooms", { name: roomName, hotelId: hotelId })).lastId;
+
+            const hotels = await this.#db.getValues("Hotels", { hotelWalletAddress: hotelWalletAddress });
+            const hotelId = hotels[0].Id;
+
+            const rowId = (await this.#db.insertValue("Rooms", { name: roomName, hotelId: hotelId, roomNftId: roomNftId })).lastId;
             resObj.success = { rowId: rowId };
         } catch (error) {
             resObj.error = `Error in creating the room ${error}`;
@@ -76,7 +82,10 @@ class TransactionService {
             const hotels = await this.#db.getValues("Hotels", { id: hotelId });
             const hotelWallet = hotels[0].HotelWalletAddress;
             const hotel = new XrplAccount(hotelWallet, null, { xrplApi: this.#xrpl });
-            const nftsFromHotel = await hotel.getNftsByUri(hotels[0].HotelNftId);
+
+            let nftsFromHotel = await hotel.getNfts();
+            nftsFromHotel = nftsFromHotel.filter(n => xrpl.convertHexToString(n.URI).toUpperCase().startsWith((hotels[0].HotelNftId).toUpperCase()));
+
             const nftIds = nftsFromHotel.map(n => n.NFTokenID);
 
             rooms = rooms.filter(rm => nftIds.includes(rm.RoomNftId));
@@ -195,7 +204,7 @@ class TransactionService {
                 throw ('Table "Hotel" not found.')
             }
 
-            resObj = { rowId: insertedId, offerId: availableOffer.index }
+            resObj.success = { rowId: insertedId, offerId: availableOffer.index }
 
         } catch (e) {
             resObj.error = e;
@@ -321,8 +330,46 @@ class TransactionService {
             this.#db.open();
             await this.#xrpl.connect();
 
-            const bookings = await this.#db.getValues('Bookings', filters);
-            resObj.success = { bookings: bookings };
+            let bookings = await this.#db.getValues('Bookings', filters);
+
+            const roomIds = bookings.map(b => b.RoomId);
+
+            const rooms = await this.#db.getValues('Rooms', { id: roomIds }, 'IN');
+            const hotelIds = rooms.map(r => r.HotelId)
+
+            const hotels = await this.#db.getValues('Hotels', { id: hotelIds }, 'IN');
+
+            let filtered_bookings = bookings.map(b => {
+                return rooms.map(r => {
+                    return hotels.map(h => {
+
+                        if (b.RoomId == r.Id && r.HotelId == h.Id) {
+                            return {
+                                bookingId: b.Id,
+                                roomId: r.Id,
+                                hotelId: h.Id,
+                                customer: b.PersonName,
+                                fromDate: b.FromDate,
+                                toDate: b.ToDate,
+                                roomName: r.Name,
+                                hotelName: h.Name,
+                                hotelLocation: h.Address,
+                                email: h.Email
+                            }
+
+                        }
+
+                        return null;
+
+                    });
+                });
+            })
+
+            filtered_bookings = filtered_bookings.filter(fb => fb != null);
+
+            // bookings = bookings.map(b => ({ bookingId: b.Id, roomId: b.RoomId, customer: b.PersonName, fromDate: b.FromDate, toDate: b.ToDate }))
+
+            resObj.success = { bookings: filtered_bookings };
 
         } catch (error) {
             resObj.error = `Error in fetching bookings: ${error}`;
