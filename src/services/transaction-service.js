@@ -341,31 +341,49 @@ class TransactionService {
 
             let filtered_bookings = bookings.map(b => {
                 return rooms.map(r => {
-                    return hotels.map(h => {
+                    if (b.RoomId == r.Id) {
+                        return hotels.map(h => {
 
-                        if (b.RoomId == r.Id && r.HotelId == h.Id) {
-                            return {
-                                bookingId: b.Id,
-                                roomId: r.Id,
-                                hotelId: h.Id,
-                                customer: b.PersonName,
-                                fromDate: b.FromDate,
-                                toDate: b.ToDate,
-                                roomName: r.Name,
-                                hotelName: h.Name,
-                                hotelLocation: h.Address,
-                                email: h.Email
+                            if (r.HotelId == h.Id) {
+                                if (b.RoomId == r.Id && r.HotelId == h.Id) {
+                                    return {
+                                        bookingId: b.Id,
+                                        roomId: r.Id,
+                                        hotelId: h.Id,
+                                        customer: b.PersonName,
+                                        fromDate: b.FromDate,
+                                        toDate: b.ToDate,
+                                        roomName: r.Name,
+                                        hotelName: h.Name,
+                                        hotelLocation: h.Address,
+                                        email: h.Email
+                                    }
+
+                                }
+
+                                return ;
+
                             }
 
-                        }
+                            return ;
 
-                        return null;
+                        });
 
-                    });
+                    } else {
+                        return ;
+                    }
                 });
             })
 
-            filtered_bookings = filtered_bookings.filter(fb => fb != null);
+            filtered_bookings = filtered_bookings.map(fb => {
+                return fb.filter(fbb => fbb != null);
+            });
+
+            filtered_bookings = filtered_bookings.map(fb => {
+                return fb.map(fbb =>  {
+                    return fbb.filter(fbc => fbc != null);
+                });
+            });
 
             // bookings = bookings.map(b => ({ bookingId: b.Id, roomId: b.RoomId, customer: b.PersonName, fromDate: b.FromDate, toDate: b.ToDate }))
 

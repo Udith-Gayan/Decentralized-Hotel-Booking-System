@@ -81,10 +81,32 @@ class SqliteDatabase {
         if (filter) {
             console.log(filter);
             const columnNames = Object.keys(filter);
-            for (const columnName of columnNames) {
-                filterStr += `${columnName} ${op} ? AND `;
-                values.push(filter[columnName] ? filter[columnName] : 'NULL');
+
+            if(op === 'IN') {
+                for (const columnName of columnNames) {
+
+
+                    filterStr += `${columnName} ${op} ( `;
+
+                    const valArray = filter[columnName];
+                    for (const v of valArray) {
+                        filterStr += `?, `;
+                        values.push(v);
+                    }
+
+                    filterStr = filterStr.slice(0, -2);
+                    filterStr += `) AND `;
+                }
             }
+            else {
+                for (const columnName of columnNames) {
+    
+                    filterStr += `${columnName} ${op} ? AND `;
+                    values.push(filter[columnName] ? filter[columnName] : 'NULL');
+                }
+            }
+
+
         }
         filterStr = filterStr.slice(0, -5);
 
