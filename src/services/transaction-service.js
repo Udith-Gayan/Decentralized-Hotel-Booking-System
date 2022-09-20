@@ -75,7 +75,7 @@ class TransactionService {
         let resObj = {};
         try {
             this.#db.open();
-            this.#xrpl.connect();
+            await this.#xrpl.connect();
 
             let rooms = await this.#db.getValues("Rooms", { hotelId: hotelId });
 
@@ -97,7 +97,7 @@ class TransactionService {
             resObj.error = `Error in fetching rooms: ${error}`;
         } finally {
             this.#db.close();
-            this.#xrpl.disconnect();
+            await this.#xrpl.disconnect();
         }
 
         return resObj;
@@ -107,7 +107,7 @@ class TransactionService {
     async #mintCreateRegTokenOffers(noOfTokens) {
         try {
             for (let i = 0; i < noOfTokens; i++) {
-                // let result = await this.#contractAcc.mintNft(this.#registrationURI, 0, 2, {isBurnable: true, isTransferable: true, isOnlyXRP: true});
+                let result = await this.#contractAcc.mintNft(this.#registrationURI, 0, 2, {isBurnable: true, isTransferable: true, isOnlyXRP: true});
             }
             console.log(`${noOfTokens} tokens created for the account ${settings.contractWalletAddress}`);
 
@@ -135,7 +135,7 @@ class TransactionService {
                 //     await this.#contractAcc.offerSellNft(id, "2", 'XRP', settings.contractWalletAddress);
                 // });
                 for (const id of tokenIds) {
-                    await this.#contractAcc.offerSellNft(id, "2", 'XRP', settings.contractWalletAddress);
+                    await this.#contractAcc.offerSellNft(id, "4", 'XRP', settings.contractWalletAddress);
                 }
             }
 
@@ -157,9 +157,7 @@ class TransactionService {
 
             let createdOffers = await this.#contractAcc.getNftOffers();
             console.log(createdOffers);
-
-
-            return ("Good");
+            return ("Done");
 
         } catch (e) {
             console.log("Error occured in minting tokens;");
@@ -209,7 +207,7 @@ class TransactionService {
         } catch (e) {
             resObj.error = e;
         }
-        // return JSON.stringify(resObj);
+
         return resObj;
 
     }
@@ -240,7 +238,7 @@ class TransactionService {
                 const regNftId = rows[0].HotelNftId;
                 if (await this.#hasNft(walletAddress, regNftId)) {
                     // Update database
-                    await this.#db.updateValue("Hotels", { isRegistered: 1 }, { id: rowId });
+                    await this.#db.updateValue("Hotels", { isRegistered: 1 , hotelWalletAddress: walletAddress }, { id: rowId });
                 }
             } else {
                 throw ("Error in confirming registration. Re-register please.");
@@ -313,7 +311,6 @@ class TransactionService {
             this.#db.close();
             await this.#xrpl.disconnect();
         }
-
         return resObj;
     }
 
@@ -360,25 +357,28 @@ class TransactionService {
                                     }
 
                                 }
-
+                                console.log('364');
                                 return ;
 
                             }
-
+                            console.log('368');
                             return ;
 
                         });
 
                     } else {
+                        console.log('374');
                         return ;
                     }
                 });
             })
 
+            console.log(filtered_bookings);
             filtered_bookings = filtered_bookings.map(fb => {
                 return fb.filter(fbb => fbb != null);
             });
 
+            console.log(filtered_bookings);
             filtered_bookings = filtered_bookings.map(fb => {
                 return fb.map(fbb =>  {
                     return fbb.filter(fbc => fbc != null);
@@ -424,8 +424,6 @@ class TransactionService {
         return resObj;
     }
 }
-
-
 
 module.exports = {
     TransactionService

@@ -1,11 +1,9 @@
 const HotPocket = require("hotpocket-nodejs-contract");
-const xrpl = require("xrpl")
 const { ApiService } = require('./services/api-service');
 const { DbService } = require("./core_services/dbService");
 
 const booking_contract = async (ctx) => {
     // Your smart contract logic.
-    console.log('Blank contract');
     const isReadOnly = ctx.readonly;
 
     const apiService = new ApiService();
@@ -26,7 +24,6 @@ const booking_contract = async (ctx) => {
             // Pass the JSON message to our application logic component.
             await apiService.handleRequest(user, message, isReadOnly);
 
-           
         }
 
     }
