@@ -4,6 +4,7 @@ const { DbService } = require("./core_services/dbService");
 
 const booking_contract = async (ctx) => {
     // Your smart contract logic.
+    console.log('Hotel Reservation Smart Contract is running.');
     const isReadOnly = ctx.readonly;
 
     const apiService = new ApiService();
