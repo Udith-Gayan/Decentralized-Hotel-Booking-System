@@ -45,7 +45,7 @@ export class DbService {
                 FOREIGN KEY (RoomId) REFERENCES Rooms (Id)
                 )`)
 
-            await this.#insertData();
+            // await this.#insertData();
             this.#db.close();
         }
     }

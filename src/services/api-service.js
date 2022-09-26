@@ -54,7 +54,11 @@ export class ApiService {
             // await this.sendOutput(user, result);
         }
 
-        await this.sendOutput(user, {promiseId: message.promiseId, ...result});
+        if(isReadOnly){
+            await this.sendOutput(user, result);
+        } else {
+            await this.sendOutput(user, {promiseId: message.promiseId, ...result});
+        }
 
         this.db.close();
     }

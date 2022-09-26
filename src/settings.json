@@ -1,7 +1,7 @@
 {
     "settings" : {
         "dbPath":"HotelBooking1.db",
-        "contractWalletAddress": "rsdFny8UByHcLPHKfrwh6ozMqEk1A8T2oR",
-        "contractWalletSecret": "sn5rr6KnsyxKnn2UL8rXwwEXjGDy2"
+        "contractWalletAddress": "rGVfAGdDF9fzsmfePkyHK2HnD25BKMKNbr",
+        "contractWalletSecret": "sswXtv8odxCnUcBwaySJAV6k4ibTk"
     }
 }

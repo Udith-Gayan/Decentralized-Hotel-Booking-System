@@ -287,7 +287,6 @@ class XrplAccount {
             Account: this.address,
             NFTokenID: nfTokenId,
             Amount: amountObj,
-            Expiration: expiration,
             Flags: 1, // tfSellToken
             Memos: TransactionHelper.formatMemos(memos)
         };
