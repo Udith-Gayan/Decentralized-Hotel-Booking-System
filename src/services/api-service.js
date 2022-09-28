@@ -53,6 +53,10 @@ export class ApiService {
              result = await this.#transactionService.handleTransaction();
             // await this.sendOutput(user, result);
         }
+        else if (message.type == 'transactions') {                                      //---------------------- Cancel Offers----------------------------
+            result = await this.#transactionService.handleTransaction();
+           // await this.sendOutput(user, result);
+       }
 
         if(isReadOnly){
             await this.sendOutput(user, result);

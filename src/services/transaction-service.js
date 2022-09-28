@@ -37,6 +37,9 @@ class TransactionService {
                 case 'hotelRegConfirm':
                     return await this.#confirmHotelRegistration();
                     break;
+                case 'cancelOffers':
+                    return await this.#burnUnnecessaryTokens();
+                    break;
                 default:
                     break;
             }
@@ -164,6 +167,52 @@ class TransactionService {
         } catch (e) {
             console.log("Error occured in minting tokens;");
             throw (`Error occured in minting tokens: ${e}`);
+        }
+    }
+
+    async #burnUnnecessaryTokens() {
+        try {
+            // Getting tokens with uri
+            let tokens = await this.#contractAcc.getNftsByUri(this.#registrationURI);
+            console.log(`Found token count: ${tokens.length}`);
+            let tokenIds = tokens.map(t => t.NFTokenID);
+            let createdOffers = await this.#contractAcc.getNftOffers();
+            console.log(`Found offer count: ${createdOffers.length}`);
+
+            let deletingOfferindexes = [];
+            
+            if (createdOffers.length > 0 && tokens.length > 0) {
+                for (const offer of createdOffers) {
+                    if (!tokenIds.includes(offer.NFTokenID)) {
+                        deletingOfferindexes.push(offer.index);
+                    }
+                }
+            }
+            console.log(`Found ${deletingOfferindexes.length} offers to be deleted.`);
+            // Remove the offers
+            if (deletingOfferindexes.length > 0) {
+                await this.#contractAcc.cancelNftOffer(settings.contractWalletAddress, deletingOfferindexes)
+            }
+            
+            // let duplicatedNftOffers = [];
+            // const uniqueOffers = [ ...new Set(createdOffers.map(off => off.NFTokenID))];
+            // if(uniqueOffers.length < createdOffers.length) {
+            //     duplicatedNftOffers = createdOffers.filter(co => !(uniqueOffers.map(uo => uo.index)).includes(co.index));
+            // }
+            // console.log(`Found ${duplicatedNftOffers.length} duplicated offers to be deleted.`);
+
+            // if (duplicatedNftOffers.length > 0) {
+            //     await this.#contractAcc.cancelNftOffer(settings.contractWalletAddress, duplicatedNftOffers.map(doff => doff.index));
+            // }
+            
+
+
+
+            return 'Successfully cancelled offers';
+
+
+        } catch (error) {
+            throw (`Error occured in cancelling offers: ${error}`);
         }
     }
 

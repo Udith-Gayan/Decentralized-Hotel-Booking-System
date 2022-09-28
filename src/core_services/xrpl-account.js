@@ -310,6 +310,14 @@ class XrplAccount {
         }, options);
     }
 
+    cancelNftOffer(account, nftTokenOffers = [], options = {}) {
+        return this.#submitAndVerifyTransaction({
+            TransactionType: "NFTokenCancelOffer",
+            Account: account,
+            NFTokenOffers: nftTokenOffers
+        }, options);
+    }
+
     sellNft(offerId, memos = null, options = {}) {
 
         return this.#submitAndVerifyTransaction({
