@@ -1,1 +1,0 @@
-# Hotel Booking Smart Contract

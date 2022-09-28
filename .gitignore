@@ -1,6 +1,35 @@
 node_modules
-dist/build
-dist/lib/
-dist/index.js
+booking_contract/dist/build
+booking_contract/dist/lib/
+booking_contract/dist/index.js
 
 api-commands.txt
+
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+#Custom files & folders
+backups
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+booking_client_app/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
