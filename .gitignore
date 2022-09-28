@@ -1,3 +1,5 @@
+# Contract
+
 node_modules
 booking_contract/dist/build
 booking_contract/dist/lib/
@@ -6,6 +8,8 @@ booking_contract/dist/index.js
 api-commands.txt
 
 
+
+# React App
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
