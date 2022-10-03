@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import ContractService from "./../../services/contract-service";
 import toast from "react-hot-toast";
 
+const redirectUrl = process.env.REACT_APP_LOGO_RIDERECTION_URL;
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const contractService = ContractService.instance;
@@ -44,9 +46,10 @@ const LandingPage = () => {
   const hotelOwnerClick = () => {
     localStorage.removeItem("user");
     localStorage.setItem("user", JSON.stringify("hotelowner"));
-    setHotelOwnerLogVisibility(!hotelOwnerLogVisibility);
-    setHotelOwnerRegisterVisibility(!hotelOwnerRegisterVisibility);
-    setHotelOwnerLoginVisibility(!hotelOwnerLoginVisibility);
+    navigate("/hotel-owner");
+    // setHotelOwnerLogVisibility(!hotelOwnerLogVisibility);
+    // setHotelOwnerRegisterVisibility(!hotelOwnerRegisterVisibility);
+    // setHotelOwnerLoginVisibility(!hotelOwnerLoginVisibility);
   };
 
   const customerRegister = () => {
@@ -83,8 +86,13 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
+    window.addEventListener('refresh', () => {
+      console.log('Refreshing page');
+      window.location.href = redirectUrl;
+    });
     initContractService();
-  }, []);
+
+  }, []);   
 
   return (
     <div className={classes.landingPageBackground}>

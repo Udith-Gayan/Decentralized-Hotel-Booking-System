@@ -143,7 +143,7 @@ const HotelOverview = () => {
             >
               <Card.Body>
                 <Card.Title>{roomDetail.roomName}</Card.Title>
-                <Card.Text>{roomDetail.nftId}</Card.Text>
+                <Card.Text><b>Room NFT:</b> {roomDetail.nftId}</Card.Text>
                 {JSON.parse(localStorage.getItem("user")) === "customer" && (
                   <Button
                     variant="primary"

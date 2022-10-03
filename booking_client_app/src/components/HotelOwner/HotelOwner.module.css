@@ -1,0 +1,21 @@
+.landingPageBackground{
+    background-image: url("../../../public/background.jpg");
+    height: 100vh;
+}
+
+.box{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.headerText{
+    margin-left: 10px;
+    color: white;
+    margin-bottom: 0;
+    padding: 20px;
+    cursor: pointer;
+}
