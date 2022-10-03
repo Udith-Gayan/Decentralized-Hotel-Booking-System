@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import LandingPage from "./components/LandingPage/LandingPage";
+import HotelOwner from "./components/HotelOwner/HotelOwner";
 import HotelOwnerRegisterLogin from "./components/HotelOwnerRegisterLogin/HotelOwnerRegisterLogin";
 import HotelOverview from "./components/HotelOverview/HotelOverview";
 import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
@@ -8,6 +9,8 @@ import HotelOwnerLoginDashboard from "./components/HotelOwnerLoginDashboard/Hote
 import Hotels from "./components/Hotels/Hotels";
 import MyReservations from "./components/MyReservations/MyReservations";
 import Room from "./components/Room/Room";
+import { useEffect } from "react";
+
 
 function App() {
   return (
@@ -19,6 +22,7 @@ function App() {
             path="/hotel-owner-register-login"
             element={<HotelOwnerRegisterLogin />}
           ></Route>
+          <Route path="hotel-owner" element={<HotelOwner />}></Route>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="hotel-overview" element={<HotelOverview />}></Route>
             <Route
