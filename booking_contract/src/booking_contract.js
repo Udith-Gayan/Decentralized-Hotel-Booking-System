@@ -3,7 +3,6 @@ const { ApiService } = require('./services/api-service');
 const { DbService } = require("./core_services/dbService");
 
 const booking_contract = async (ctx) => {
-    // Your smart contract logic.
     console.log('Hotel Reservation Smart Contract is running.');
     const isReadOnly = ctx.readonly;
 
@@ -19,7 +18,6 @@ const booking_contract = async (ctx) => {
             const buf = await ctx.users.read(input);
 
             // Let's assume all data buffers for this contract are JSON.
-            // In real-world apps, we need to gracefully fitler out invalid data formats for our contract.
             const message = JSON.parse(buf);
 
             // Pass the JSON message to our application logic component.
@@ -29,7 +27,6 @@ const booking_contract = async (ctx) => {
 
     }
 }
-
 
 
 const hpc = new HotPocket.Contract();
