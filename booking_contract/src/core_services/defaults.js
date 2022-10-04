@@ -1,8 +1,7 @@
 const DefaultValues = {
     registryAddress: '',
     rippledServer: 'wss://hooks-testnet-v2.xrpl-labs.com',
-    xrplApi: null,
-    stateIndexId: 'evernodeindex'
+    xrplApi: null
 }
 
 class Defaults {

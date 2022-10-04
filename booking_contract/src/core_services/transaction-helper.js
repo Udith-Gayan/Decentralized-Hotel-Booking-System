@@ -1,4 +1,9 @@
-const { MemoFormats } = require('./evernode-common');
+const MemoFormats = {
+    TEXT: 'text/plain',
+    JSON: 'text/json',
+    BASE64: 'base64',
+    HEX: 'hex'
+}
 
 class TransactionHelper {
 
