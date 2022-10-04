@@ -1,20 +1,18 @@
 import ContractService from "./contract-service";
 import toast from "react-hot-toast";
 
-const fundWalletAddress =
-  process.env.REACT_APP_HOTEL_FUNDING_SEED_ACCOUNT_ADDRESS;
-const fundWalletSecret =
-  process.env.REACT_APP_HOTEL_FUNDING_SEED_ACCOUNT_SECRET;
+const fundWalletAddress = process.env.REACT_APP_HOTEL_FUNDING_SEED_ACCOUNT_ADDRESS;
+const fundWalletSecret = process.env.REACT_APP_HOTEL_FUNDING_SEED_ACCOUNT_SECRET;
 const contractWalletAddress = process.env.REACT_APP_CONTRACT_WALLET_ADDRESS;
 
 const xrpl = window.xrpl;
+
 let toastId = 0;
 
 export default class HotelService {
   static instance = HotelService.instance || new HotelService();
 
-  #walletServer = "wss://hooks-testnet-v2.xrpl-labs.com";
-  // #walletServer = 'wss://xls20-sandbox.rippletest.net:51233';
+  #xrplServerURL = "wss://hooks-testnet-v2.xrpl-labs.com";
 
   userWallet = {
     address: null,
@@ -30,7 +28,7 @@ export default class HotelService {
   #hotelId = 0;
 
   constructor() {
-    this.#xrplClient = new xrpl.Client(this.#walletServer);
+    this.#xrplClient = new xrpl.Client(this.#xrplServerURL);
   }
 
   /**
@@ -97,11 +95,7 @@ export default class HotelService {
     };
   }
 
-  async #getFunded(
-    toAccountAddress,
-    xrpAmount,
-    fromAccountSecret = fundWalletSecret
-  ) {
+  async #getFunded(toAccountAddress, xrpAmount, fromAccountSecret = fundWalletSecret) {
     const _wallet = xrpl.Wallet.fromSeed(fromAccountSecret);
     const prepared = await this.#xrplClient.autofill({
       TransactionType: "Payment",
@@ -165,7 +159,7 @@ export default class HotelService {
   }
 
   /**
-   *
+   * Calls on hotel Registration request submission.
    * @param {hotelName: <>, location: <>, email: <>} hotelObj
    *
    * @returns  { "Hotel Registration Successful."}
