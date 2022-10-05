@@ -11,6 +11,9 @@ This repository contains two projects,
 The users can interact with the smart contract through the client application which is a web application developed with React.js. 
 The smart contract can run on the Evernode platform which has been built on the XRP Ledger.
 
+## Overview Diagram
+![imge](Images/img1.png)
+
 # 1. Hotel Booking Smart Contract
 
 This is a nodeJS application that is capable of handling requests coming from the client web application, running the relevant logic, connecting with the XRP ledger and an internal database and sending the responses back to the web application.
