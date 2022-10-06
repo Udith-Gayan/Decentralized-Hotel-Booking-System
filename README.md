@@ -5,22 +5,32 @@ This is a decentralized hotel booking system, running on evernode clusters, inte
 # Introduction
 This repository contains two projects,
 <br>
-1. Hotel booking client application
-2. Hotel booking smart contract
+1. [Hotel booking client application](#1-hotel-booking-smart-contract)
+2. [Hotel booking smart contract](#2-hotel-booking-client-application)
    
 The users can interact with the smart contract through the client application which is a web application developed with React.js. 
 The smart contract can run on the Evernode platform which has been built on the XRP Ledger.
 
-## Overview Diagram
-![imge](Images/img1.png)
+
+## Overview Diagrams
+
+### Hotel Data flow
+
+![image](Images/hotel-owner.jpeg)
+
+### Customer data flow
+
+![image2](Images/customer.jpeg)
 
 # 1. Hotel Booking Smart Contract
 
 This is a nodeJS application that is capable of handling requests coming from the client web application, running the relevant logic, connecting with the XRP ledger and an internal database and sending the responses back to the web application.
  We use web sockets for communication between the client app and the contract. 
 
+ The smart contract has its own XRPL wallet which is used to mint NFTs for registration and to do future transactions. There are pre-minted Hotel registration NFTs and sell offers for them in the wallet.
+
 ## The project structure
-The project structure is similar to a typical NodeJS application. .
+The project structure is similar to a typical NodeJS application.
 ```
 booking_contract
 ├── dist
@@ -49,7 +59,7 @@ booking_contract
     └── settings.json
 ```
 
-The **_core-services_** folder contains the helper-service classes to connect with SQlite database and XRP ledger. 
+The **_core-services_** folder contains the helper-service classes to connect with the SQlite database and XRP ledger. 
 
 The **_booking_contract.js_** file is the starting point of the contract and during every round of the consensus, this smart contract runs from the beginning.
 ```javascript
@@ -281,7 +291,7 @@ There are several both private and public methods within the class. Some of them
   ```
 
 - async #acceptHotelRegistrationOffer(regObj) <br>
-  This method is a private method and is called in hotel registration process. Once the web application receives a NFTSellOffer ID , this methods accepts the offer to buy the registration NFT. After the successful buying, the contract is notified about this.
+  This method is a private method and is called in hotel registration process. Once the web application receives a NFTSellOffer ID, this method accepts the offer to buy the registration NFT. After the successful buying, the contract is notified about this.
   ```javascript
   async #acceptHotelRegistrationOffer(regObj) {
     const messageType = "hotelRegistration";
