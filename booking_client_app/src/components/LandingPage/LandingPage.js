@@ -79,7 +79,7 @@ const LandingPage = () => {
 
     if (initService) {
       setLandingPageButton(false);
-      toast.success("Connected!");
+      toast.success("Connected to ledger!");
     } else {
       setLandingPageButton(true);
     }
