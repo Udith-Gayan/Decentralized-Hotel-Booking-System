@@ -1,5 +1,7 @@
 # Smart Hotel Booking System
-This is a decentralized hotel booking system, running on evernode clusters, integrating with XRPL, as a Proof of Concept.
+This is a decentralized hotel booking system, running on Evernode clusters, integrating with XRPL, as a Proof of Concept.
+<br>
+Visit: [smart-hotel-booking.netlify.app](https://smart-hotel-booking.netlify.app/)
 
 
 # Introduction
